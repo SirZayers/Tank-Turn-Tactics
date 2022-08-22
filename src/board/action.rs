@@ -3,23 +3,23 @@ use crate::board::Player;
 use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Request {
     pub sender_token: u128,
     pub action: Action,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub enum Action {
     Players,
     TankMove { direction: Direction },
     TankShoot { target_token: u128 },
     TankUpgrade,
     Donate { target_token: u128 },
-    Log,
+    Log { since: u64 },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub enum Direction {
     Right,
     Up,
@@ -38,8 +38,14 @@ pub enum Response {
     TargetIsSelf,
     NoActionPoints,
     MovesOutside,
-    Log,
+    Log { logs: Vec<LogEntry> },
     Error,
+}
+
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+pub struct LogEntry {
+    pub id: u64,
+    pub request: Request,
 }
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
@@ -180,6 +186,8 @@ pub fn act(board: &mut Board, sender_token: &u128, action: &Action) -> Response 
             crate::board::update_player(board, target);
             Response::Ok
         }
-        Action::Log => Response::Log,
+        Action::Log { since } => Response::Log {
+            logs: Vec::new(), /* TODO: filter logs from board */
+        },
     }
 }

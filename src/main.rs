@@ -8,6 +8,11 @@ use board::{
     Player, Request, Response,
 };
 
+use openssl::{
+    pkey::PKey,
+    sign::{Signer, Verifier},
+};
+
 // Create board an save in HashMap by board id
 
 fn serve(board: &mut Board, sender_token: u128, action: Action) -> Response {
@@ -25,6 +30,23 @@ fn serve(board: &mut Board, sender_token: u128, action: Action) -> Response {
 }
 
 fn main() {
+    let data = serde_json::to_string(&TankMove { direction: Up }).unwrap();
+
+    let private_key =
+        PKey::private_key_from_pem(&std::fs::read("keys/private.pem").unwrap()).unwrap();
+    let mut signer = Signer::new_without_digest(&private_key).unwrap();
+    let signature = signer.sign_oneshot_to_vec(data.as_bytes()).unwrap();
+
+    let public_key = PKey::public_key_from_pem(&std::fs::read("keys/public.pem").unwrap()).unwrap();
+    let mut verifier = Verifier::new_without_digest(&public_key).unwrap();
+    let valid = verifier
+        .verify_oneshot(&signature, data.as_bytes())
+        .unwrap();
+
+    println!("message: {:}", data);
+    println!("signature: {:?}", signature);
+    assert!(valid);
+
     let mut board = create_local_board(1, 10, 10);
     update_player(
         &mut board,

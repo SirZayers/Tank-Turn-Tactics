@@ -9,3 +9,4 @@ edition = "2021"
 
 serde_json = "1.0.83"
 serde = { version = "1.0.142", features = ["derive"] }
+openssl = "0.10.41"

@@ -8,7 +8,7 @@ use std::fmt::Write as fmtWrite;
 use std::fs::OpenOptions;
 use std::io::Write;
 
-pub use crate::board::action::{act, Action, ClientPlayer, Direction, Request, Response};
+pub use crate::board::action::{act, Action, ClientPlayer, Direction, LogEntry, Request, Response};
 pub use crate::board::player::Player;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,6 +22,7 @@ pub struct Board {
     has_ended: bool,
     winner: Option<Player>,
     pub players: HashMap<u128, Player>,
+    pub logs: Vec<LogEntry>,
 }
 
 impl fmt::Display for Board {
@@ -104,6 +105,7 @@ pub fn create_board(
         has_started: false,
         winner: None,
         players: HashMap::new(),
+        logs: Vec::new(),
     };
 
     // Fill log files with board information
@@ -142,6 +144,7 @@ pub fn create_local_board(id: u128, width: i64, height: i64) -> Board {
         has_started: false,
         winner: None,
         players: HashMap::new(),
+        logs: Vec::new(),
     };
 }
 
